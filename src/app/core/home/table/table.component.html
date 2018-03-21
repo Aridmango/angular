@@ -1,0 +1,28 @@
+<div class="container">
+	<div class="col-lg-8">
+		<table class="table">
+			<tr>
+				<th>Currency</th>
+				<th>24 Hour Change</th>
+				<th>Value USD</th>
+			</tr>
+			<tr *ngFor="let c of currencies; let i = index ">
+				<td>
+					<a [routerLink]="['/currency', currencies[i].id]">
+						{{ c['name'] }}
+					</a>
+				</td>
+				<td [ngClass]="percentageColors[i] ? 'positive-class' : 'negative-class'">
+					{{ c['percent_change_24h']  | number:'1.2-2' }}%
+				</td>
+				<td>${{ c['price_usd']  | number:'1.2-2' }}</td>
+			</tr>
+		 </table>	
+		 <button 
+		 	type="button" 
+		 	class="btn btn-primary btn-block"
+		 	(click)="incrementLimit()">
+		 	More
+		 </button>
+	</div>
+</div>
