@@ -92,8 +92,7 @@ export class ApiCallsService {
   getRequestHistoricalData(currencySymbol: string) {
     return this.httpClient.get(this.ccHistoricalURL + currencySymbol + '&tsym=USD&limit=29').toPromise()
     .then(res => {
-      console.log("res data", res.Data)
-      this.historicalData = res.Data;
+      this.historicalData = res['Data'];
       console.log("get request", this.historicalData);
     });
   }

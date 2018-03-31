@@ -15,6 +15,7 @@ export class ChartsComponent implements OnInit {
 	historicalData: HistoricalData[] = [];
 	highs: number[] = [];
 	lows: number[] = [];
+  jsdate: any;
 
   constructor(private apiCallsService: ApiCallsService) { }
 
@@ -66,8 +67,8 @@ export class ChartsComponent implements OnInit {
 
   fixDates() {
   	for (let i = 0; i < 30; i++) {
-  		let jsdate = new Date(this.historicalData[i].time * 1000);
-  		this.dates.push(jsdate.toLocaleTimeString('en', { year: 'numeric', month: 'short', day: 'numeric' }))
+  		this.jsdate = new Date((+this.historicalData[i].time) * 1000);
+  		this.dates.push(this.jsdate.toLocaleTimeString('en', { year: 'numeric', month: 'short', day: 'numeric' }))
   	}
   }
 }

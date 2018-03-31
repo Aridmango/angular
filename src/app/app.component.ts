@@ -17,7 +17,7 @@ import { ApiCallsService } from './apiCalls.service'
 export class AppComponent implements OnInit {
   title = 'app';
   nightMode = false;
-  subscription = Subscription;
+  subscription = new Subscription;
   //intialInformation: boolean = false;
 
 	constructor(private currencyService: CurrencyService,
