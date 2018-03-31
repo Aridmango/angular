@@ -1,0 +1,25 @@
+<div class="container">
+	<table class="table">
+		<tbody *ngFor="let article of ccNews; let i = index ">
+				<tr *ngIf="newsLimit(i)">
+					<td>
+						<a href="{{ article['url'] }}">
+							{{ article['title'] }}
+						</a>
+						<p>({{ slicedUrls[i] }})</p>
+					</td>
+					<td>
+						<a href="{{ article['url'] }}">
+							<img src="{{article['imageurl']}}" alt="{{ article['title'] }}">
+						</a>
+					</td>
+				</tr>
+		</tbody>
+	 </table>	
+	 <button 
+	 	type="button" 
+	 	class="btn btn-primary btn-block"
+	 	(click)="increaseNewsLimit()">
+	 	More
+	 </button>
+</div>

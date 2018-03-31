@@ -1,28 +1,51 @@
 <div class="container">
-	<div class="col-lg-8">
-		<table class="table">
+	<table class="table">
+		<thead>
 			<tr>
-				<th>Currency</th>
-				<th>24 Hour Change</th>
-				<th>Value USD</th>
+				<th width="5%">#</th>
+				<th width="23.75%">Currency</th>
+				<th width="23.75%">24 Hour Change</th>
+				<th width="23.75%">Value USD</th>
+				<th width="23.75%">Market Cap %</th>
 			</tr>
-			<tr *ngFor="let c of currencies; let i = index ">
+		</thead>
+		<tbody *ngFor="let c of currencies; let i = index " (click)="expandedRow[i] = !expandedRow[i]">
+			<tr>
+				<td>
+					{{ i + 1 }}
+				</td>
 				<td>
 					<a [routerLink]="['/currency', currencies[i].id]">
 						{{ c['name'] }}
 					</a>
 				</td>
 				<td [ngClass]="percentageColors[i] ? 'positive-class' : 'negative-class'">
-					{{ c['percent_change_24h']  | number:'1.2-2' }}%
+					{{ c['percent_change_24h'] | number:'1.2-2' }}%
 				</td>
-				<td>${{ c['price_usd']  | number:'1.2-2' }}</td>
+				<td>${{ c['price_usd'] | number:'1.2-2' }}</td>
+				<td> {{ marketCapPercentage[i] | percent:'.1-1' }}</td>
 			</tr>
-		 </table>	
-		 <button 
-		 	type="button" 
-		 	class="btn btn-primary btn-block"
-		 	(click)="incrementLimit()">
-		 	More
-		 </button>
-	</div>
+			<tr *ngIf="expandedRow[i]">
+				<td></td>
+				<td>Market Cap: ${{ c['market_cap_usd'] | formatLargeNums}}</td>
+				<td>24h Volume: ${{ c['24h_volume_usd'] | formatLargeNums}}</td>
+				<td>Supply: {{ c['available_supply']  | formatLargeNums}}</td>
+				<td>
+					24h Ch. Rel. Bitcoin: 
+					<span [ngClass]="bitcoinRelativeColors[i] ? 'positive-class' : 'negative-class'">
+						{{ bitcoinRelativeChange[i] | number:'1.2-2'}}%
+					</span> 
+				</td>
+			</tr>
+		</tbody>
+	 </table>	
+	 <button 
+	 	type="button" 
+	 	class="btn btn-primary btn-block"
+	 	(click)="incrementLimit()">
+	 	More
+	 </button>
 </div>
+
+
+

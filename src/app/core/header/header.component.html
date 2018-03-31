@@ -1,7 +1,20 @@
-<nav class="navbar navbar-default">
+<!-- <nav class="navbar navbar-default">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a routerLink="/" class="navbar-brand">Crypto Corner</a> <!-- routerlink is angulars way of handling routing without having to reload the page like href would -->
+    	<ul class="navbar-nav mr-auto">
+    		<li class="nav-item">
+    			<a routerLink="/" class="navbar-brand">Crypto Corner</a> routerlink is angulars way of handling routing without having to reload the page like href would
+    		</li>
+    	</ul>
     </div>
   </div>
+</nav> -->
+
+
+<nav class="navbar justify-content-between">
+  <a routerLink="/" class="navbar-brand">Crypto Corner</a>
+  <label class="switch">
+    <input type="checkbox" (click)="toggleNightMode()">
+    <span class="slider round"></span>
+  </label>
 </nav>

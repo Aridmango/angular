@@ -1,0 +1,33 @@
+.night-class {
+	all: inherit;
+	background-color: #23272b;
+	color: white;
+}
+
+.light-class {
+	all: inherit;
+	background-color: white;
+	color: black;
+}
+
+.night-class-header {
+	all: inherit;
+	background-color: #23272b;
+	color: white;
+}
+
+.light-class-header {
+	all: inherit;
+	background-color: #f8f9fa;
+	color: black;
+}
+
+#nav-night {
+	all: inherit;
+	background-color: #23272b;
+	color: white;
+}
+
+:host /deep/ router-outlet + * {
+	background-color: inherit;
+}

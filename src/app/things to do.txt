@@ -1,0 +1,8 @@
+things to do:
+- get website working on internet, aws - https://medium.com/@huynh.j93/how-to-deploy-an-angular-2-application-with-aws-for-beginners-part-1-f1ed3b09255e
+- set up database, https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-16-04
+- set up user login and authentication
+- allow used to personalize settings
+- make open up tables prettier
+- make market information accessable 
+- add last updated (eg "last updated 2 seconds ago")

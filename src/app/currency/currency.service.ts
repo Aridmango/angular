@@ -9,61 +9,28 @@ import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { catchError, retry } from 'rxjs/operators';
 
 import { Currency } from './currency.model';
-
-// export interface Currency {
-// 	id: string;
-// 	name: string;
-// 	symbol: string;
-// 	rank: string;
-// 	price_usd: string;
-// 	price_btc: string;
-// 	day_volume_usd: string;
-// 	market_cap_usd: string;
-// 	available_supply: string;
-// 	total_supply: string;
-// 	percent_change_1h: string;
-// 	percent_change_24h: string;
-// 	percent_change7d: string;
-// 	last_updated: string;
-// }
+import { Global } from './global.model';
+import { HistoricalData } from './historicalData.model';
 
 @Injectable()
 export class CurrencyService {
 	public currency: Currency[] = [];
+  public historicalData: HistoricalData[] = [];
+  public global: Global;
+  public marketCapPercentage: number[] = [];
 	percentageColors: boolean[] = [];
+  bitcoinRelativeColors: boolean[] = [];
+  public dates;
+  bitcoinRelativeChange: number[] = [];
 	cmcURL = 'https://api.coinmarketcap.com/v1/ticker/?start=';
+  cmcgURL= 'https://api.coinmarketcap.com/v1/global/';
 
   constructor(private httpClient: HttpClient) { }
-
-
-  getRequestCurrency(start: number, limit: number) {
-    // return this.httpClient.get<Currency>(this.cmcURL)
-    //   .map(
-    //     (data) => {
-    //       return data;
-    //     }
-    //   );
-
-    let promise = new Promise((resolve, reject) => {
-	    this.httpClient.get<Currency[]>(this.cmcURL + start + "&limit=" + limit)
-	      .toPromise()
-	      .then(
-	        res => { // Success
-	          //console.log("in the promise", res);
-	          this.setCurrencies(res);
-	          this.setPercentageColors();
-	          resolve();
-	        }
-	      );
-	  });
-	  //return promise;
-
-
-  }
 
   setCurrencies(data: Currency[]) {
 	  for (var i = 0; i < data.length; i++){
 	  	this.currency.push(data[i]);
+      this.currency[i].last_updated = ((+this.currency[i].last_updated)*1000);
   	}
   }
 
@@ -72,16 +39,15 @@ export class CurrencyService {
   		if (currencyName === this.currency[i].id)
   			return this.currency[i];
   	}
-  	return this.currency[14];
+  	return null;
   }
 
   getCurrencies() {
   	return this.currency;
   }
 
-  setPercentageColors() {
-  	console.log("setpercentagecolors", this.currency.length)
-  	for (var i = 0; i < this.currency.length; i++) {
+  setPercentageColors(start: number) {
+  	for (var i = start; i < this.currency.length; i++) {
   		if (+this.currency[i].percent_change_24h > 0)
   			this.percentageColors.push(true);
   		else
@@ -93,30 +59,58 @@ export class CurrencyService {
   	return this.percentageColors;
   }
 
+  calculateMarketCapPercentage(start: number) {
+    for (var i = start; i < this.currency.length; i++) {
+      this.marketCapPercentage.push((+this.currency[i]['market_cap_usd'])/(+this.global['total_market_cap_usd']))
+    }
+  }
 
-// this.currency.id = data[i].id;
-	  	// this.currency.name = data[i].name
-	  	// this.currency.symbol = data[i].symbol
-	  	// this.currency.rank = data[i].rank
-	  	// this.currency.price_usd = data[i].price_usd
-	  	// this.currency.price_btc = data[i].price_btc
-	  	// this.currency.day_volume_usd = data[i].day_volume_usd
-	  	// this.currency.market_cap_usd = data[i].market_cap_usd
-	  	// this.currency.available_supply = data[i].available_supply
-	  	// this.currency.total_supply = data[i].total_supply
-	  	// this.currency.percent_change_1h = data[i].percent_change_1h
-	  	// this.currency.percent_change_24h = data[i].percent_change_24h
-	  	// this.currency.percent_change_7d = data[i].percent_change_7d
-	  	// this.currency.last_updated = data[i].last_updated
+  getMarketCapPercentage() {
+    return this.marketCapPercentage;
+  }
 
-  //Works
-  // getCurrency() {
-  //   this.httpClient.get(this.cmcURL)
-  //     .map(
-  //       (data) => {
-  //         console.log(data);
-  //         return data;
-  //       }
-  //     ).subscribe(data => console.log('GOT DATA', data));
-  // }
+  getDate(currencyName: string) {
+    for (var i = 0; i < this.currency.length; i++){
+      if (currencyName === this.currency[i].id)
+        return this.dates[i];
+    }
+    return null;
+  }
+
+  percentChangeRelativeToBitcoin(start: number) {
+    for (var i = start; i < this.currency.length; i++) {
+      this.bitcoinRelativeChange.push(
+        +this.currency[i].percent_change_24h - +this.currency[0].percent_change_24h)
+    }
+    console.log(this.bitcoinRelativeChange);
+  }
+
+  getBitcoinRelativeChange(currencyName: string) {
+    for (var i = 0; i < this.currency.length; i++){
+      if (currencyName === this.currency[i].id)
+        return this.bitcoinRelativeChange[i];
+    }
+    return null;
+  } 
+
+  getBitcoinRelativeChanges() {
+    return this.bitcoinRelativeChange;
+  } 
+
+  setRelativeChangeColors(start: number) {
+    for (var i = start; i < this.currency.length; i++) {
+      if (+this.bitcoinRelativeChange[i] >= 0)
+        this.bitcoinRelativeColors.push(true);
+      else
+        this.bitcoinRelativeColors.push(false);
+    }
+  }
+
+  getBitcoinRelativeColors() {
+    return this.bitcoinRelativeColors;
+  }
+
+  setGlobal(g: any) {
+    this.global = g;
+  }
 }

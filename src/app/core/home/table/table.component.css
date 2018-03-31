@@ -5,3 +5,11 @@
 .negative-class {
 	color: red;
 }
+
+div {
+	background-color: inherit;
+}
+
+.box {
+  display: inline-block;
+}

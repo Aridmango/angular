@@ -9,6 +9,9 @@ import { HeaderComponent } from './core/header/header.component';
 import { HomeComponent } from './core/home/home.component';
 import { TableComponent } from './core/home/table/table.component';
 import { SocialComponent } from './core/home/social/social.component';
+import { FormatLargeNums } from './core/home/table/formatLargeNums.pipe';
+import { CryptocompareComponent } from './core/home/social/cryptocompare/cryptocompare.component';
+import { ChartsComponent } from './currency/charts/charts.component'
 
 
 const appRoutes: Routes = [
@@ -23,7 +26,10 @@ const appRoutes: Routes = [
     HeaderComponent,
     HomeComponent,
     TableComponent,
-    SocialComponent
+    SocialComponent, 
+    FormatLargeNums, 
+    CryptocompareComponent, 
+    ChartsComponent
   ],
   imports: [
     BrowserModule,
