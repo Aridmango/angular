@@ -18,3 +18,8 @@
     <span class="slider round"></span>
   </label>
 </nav>
+<div *ngIf = "global" class="text-center">
+  Total Market Cap: ${{global.total_market_cap_usd | number:'1.0-0'}}
+  |
+  Total 24h volume: ${{global.total_24h_volume_usd | number:'1.0-0'}}
+</div>

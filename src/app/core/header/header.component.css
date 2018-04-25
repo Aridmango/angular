@@ -3,6 +3,17 @@ nav {
   border-bottom: 1px solid gray;
 }
 
+div {
+  background-color: inherit;
+  border-bottom: 1px solid gray;
+}
+
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
+
+
 /* The switch - the box around the slider */
 .switch {
   position: relative;

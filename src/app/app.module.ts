@@ -11,7 +11,8 @@ import { TableComponent } from './core/home/table/table.component';
 import { SocialComponent } from './core/home/social/social.component';
 import { FormatLargeNums } from './core/home/table/formatLargeNums.pipe';
 import { CryptocompareComponent } from './core/home/social/cryptocompare/cryptocompare.component';
-import { ChartsComponent } from './currency/charts/charts.component'
+import { ChartsComponent } from './currency/charts/charts.component';
+import { CryptocurrencysubredditComponent } from './core/home/social/cryptocurrencysubreddit/cryptocurrencysubreddit.component'
 
 
 const appRoutes: Routes = [
@@ -29,7 +30,8 @@ const appRoutes: Routes = [
     SocialComponent, 
     FormatLargeNums, 
     CryptocompareComponent, 
-    ChartsComponent
+    ChartsComponent, 
+    CryptocurrencysubredditComponent
   ],
   imports: [
     BrowserModule,

@@ -46,6 +46,6 @@
                 <td>last_updated: {{ currency.last_updated | date:'full' }}</td>
             </tr>
         </table>
-        <app-charts></app-charts>
+        <app-charts [ctx]='0' [data]='historicalData'></app-charts>
     </ng-template>
 </div>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse, HttpHeaders } from '@angular/common/http';
 import 'rxjs/Rx';
 import 'rxjs/add/operator/toPromise';
 
@@ -17,91 +17,158 @@ import { HistoricalData } from './currency/historicalData.model';
 
 @Injectable()
 export class ApiCallsService {
-	public currency: Currency;
-  public historicalData: HistoricalData[] = [];
-  public global: Global;
-	cmcURL = 'https://api.coinmarketcap.com/v1/ticker/';
-  cmcgURL= 'https://api.coinmarketcap.com/v1/global/';
-  ccURL = 'https://min-api.cryptocompare.com/data/news/?lang=EN';
-  ccHistoricalURL = 'https://min-api.cryptocompare.com/data/histoday?fsym=';
+  subredditURL               = 'https://www.reddit.com/r/';
+  cryptoCompareURL           = 'https://min-api.cryptocompare.com/data/news/?lang=EN';
+	cryptoMarketCapURL         = 'https://api.coinmarketcap.com/v1/ticker/';
+  cryptoMarketCapGlobalURL   = 'https://api.coinmarketcap.com/v1/global/';
+  cryptoCompareHistoricalURL = 'https://min-api.cryptocompare.com/data/histoday?fsym=';
 
+  subredditHeader = {
+    headers: new HttpHeaders({
+      'User-agent': 'holder'
+    })
+  };
+
+  public promiseAll;
   public globalPromise;
-	public currenciesPromise;
-	public ccPromise;
-  public singleCurrencyPromise;
+  public currenciesPromise;
+  public currencyBIRPromise;
+  public subRedditNewsPromise;
+  public moreCurrenciesPromise;
+  public historicalDataPromises;
+  public cryptoCompareNewsPromise;
+  public historicalDataBIRPromise;
+  public historicalPromisesArray = [];
 
   constructor(private httpClient: HttpClient,
   						private currencyService: CurrencyService,
   						private socialService: SocialService,
               private messageService: MessageService) { }
 
-	initialGetRequests() {
-    this.globalPromise = this.httpClient.get<Global>(this.cmcgURL).toPromise()
-    this.currenciesPromise = this.httpClient.get<Currency[]>(this.cmcURL + "?start=" + 0 + "&limit=" + 25).toPromise()
-    this.ccPromise = this.httpClient.get<Global[]>(this.ccURL).toPromise()
+	initialRequests() {
+    var gP = this.httpClient.get<Global>(this.cryptoMarketCapGlobalURL).toPromise();
+    var cP = this.httpClient.get<Currency[]>(this.cryptoMarketCapURL + "?start=" + 0 + "&limit=" + 25).toPromise() 
+    this.requestCryptoCompareNews();
+    this.requestSubRedditNews('CryptoCurrency');
 
-	  let p = Promise.all([this.globalPromise, this.currenciesPromise, this.ccPromise])
-	  .then(value => {
-	  	this.currencyService.setGlobal(value[0]);
-	  	this.currencyService.setCurrencies(value[1]);
-      this.currencyService.setPercentageColors(0);
-      this.currencyService.percentChangeRelativeToBitcoin(0);
-      this.currencyService.setRelativeChangeColors(0);
-      this.currencyService.calculateMarketCapPercentage(0)
-      this.socialService.setCCNews(value[2]);
-      this.socialService.sliceUrls();
-      this.messageService.setInitialInformation(true);
-	  });
+	  this.promiseAll = Promise.all([gP, cP, this.getCryptoCompareNewsPromise(), this.getSubRedditNewsPromise()]);
+    this.promiseAll
+      .then(res => {
+        this.currencyService.setGlobal(res[0]);
+        this.currencyService.setCurrencies(res[1]);
+        this.currencyService.setPercentageColors(0);
+        this.currencyService.setMarketCapPercentage(0);
+        this.currencyService.setPercentChangeRelativeToBitcoin(0);
+        this.currencyService.setRelativeChangeColors(0);
+        this.currencyService.initializeHistoricalDataArray();
+        this.requestHistoricalData(res[1], 0, 25);
+        this.messageService.setInitialInformation(true);
+      });
 	}
 
-	getRequestGlobal() {
-    let promise = new Promise((resolve, reject) => {
-      this.httpClient.get<Global>(this.cmcgURL)
-        .toPromise()
-        .then(
-          res => { // Success
-            this.global = res;
-            resolve();
-          }
-        );
-    });
+  requestMoreCurrencies(start: number, limit: number) {
+    this.moreCurrenciesPromise = this.httpClient.get<Currency[]>(this.cryptoMarketCapURL + "?start=" + start + "&limit=" + limit).toPromise();
+    this.moreCurrenciesPromise
+      .then(res => {
+        this.currencyService.setCurrencies(res);
+        this.currencyService.setPercentageColors(start);
+        this.currencyService.setMarketCapPercentage(start);
+        this.currencyService.setRelativeChangeColors(start);
+        this.currencyService.setPercentChangeRelativeToBitcoin(start);
+        this.currencyService.increaseHistoricalDataArraySize();
+        this.requestHistoricalData(res, start, limit);
+      });
   }
 
-  getRequestMoreCurrencies(start: number, limit: number) {
-    let promise = new Promise((resolve, reject) => {
-	    this.httpClient.get<Currency[]>(this.cmcURL + "?start=" + start + "&limit=" + limit)
-	      .toPromise()
-	      .then(
-	        res => { // Success
-	          this.currencyService.setCurrencies(res);
-	          this.currencyService.setPercentageColors(start);
-            this.currencyService.percentChangeRelativeToBitcoin(start);
-            this.currencyService.setRelativeChangeColors(start);
-            this.currencyService.calculateMarketCapPercentage(start)
-	          resolve();
-	        }
-	      );
-	  });
+  //Before Initial Request (BIR)
+  requestCurrencyBIR(currencyName: string) {
+    this.currencyBIRPromise = this.httpClient.get<Currency>(this.cryptoMarketCapURL + currencyName.toLowerCase() + "/").toPromise();
+    this.currencyBIRPromise
+      .then(res => {
+        this.currencyService.setCurrencyBIR(res);
+      });
   }
 
-  getRequestSingleCurrency(currencyName: string) {
-    return this.httpClient.get<Currency>(this.cmcURL + currencyName.toLowerCase() + "/").toPromise()
-    .then(res => {this.currency = res});
+  requestHistoricalData(res: any[], start: number, limit: number) {
+    for (let i = 0; i < limit; i++) {
+      this.historicalPromisesArray[i + start] = this.httpClient.get(this.cryptoCompareHistoricalURL + res[i].symbol + '&tsym=USD&limit=29').toPromise();
+    }
+    this.historicalDataPromises = Promise.all(this.historicalPromisesArray);
+    this.historicalDataPromises
+      .then(res => {
+        for (let i = start; i < start+limit; i++) {
+          this.currencyService.setHistoricalData(res[i]['Data'], i);
+        }
+      });
   }
 
-  getRequestHistoricalData(currencySymbol: string) {
-    return this.httpClient.get(this.ccHistoricalURL + currencySymbol + '&tsym=USD&limit=29').toPromise()
-    .then(res => {
-      this.historicalData = res['Data'];
-      console.log("get request", this.historicalData);
-    });
+  //Before Initial Request (BIR)
+  requestHistoricalDataBIR(currencySymbol: string) {
+    console.log(this.cryptoCompareHistoricalURL + currencySymbol + '&tsym=USD&limit=29');
+    this.historicalDataBIRPromise = this.httpClient.get(this.cryptoCompareHistoricalURL + currencySymbol + '&tsym=USD&limit=29').toPromise();
+    this.historicalDataBIRPromise
+      .then(res => {
+        this.currencyService.setHistoricalDataBIR(res['Data']);
+      });
   }
 
-  getCurrency() {
-    return this.currency;
+  requestGlobal() {
+    this.globalPromise = this.httpClient.get<Global>(this.cryptoMarketCapGlobalURL).toPromise();
+    this.globalPromise
+      .then(res => {
+        this.currencyService.setGlobal(res);
+      });
   }
 
-  getHistoricalData() {
-    return this.historicalData;
+  requestCryptoCompareNews() {
+    this.cryptoCompareNewsPromise = this.httpClient.get(this.cryptoCompareURL).toPromise();
+    this.cryptoCompareNewsPromise
+      .then(res => {
+        this.socialService.setCryptoCompareNews(res);
+      });
+  }
+
+  requestSubRedditNews(subreddit: string) {
+    this.subRedditNewsPromise = this.httpClient.get(this.subredditURL + subreddit + '/top.json?limit=25').toPromise();
+    this.subRedditNewsPromise
+      .then(res => {
+        this.socialService.setSubRedditNews(res.data.children);
+      });
+  }
+
+  getInitialPromise() {
+    return this.promiseAll;
+  }
+
+  getMoreCurrenciesPromise() {
+    return this.moreCurrenciesPromise;
+  }
+
+  getCurrenciesPromise() {
+    return this.currenciesPromise;
+  }
+
+  getCurrencyBIRPromise() {
+    return this.currencyBIRPromise;
+  }
+
+  getHistoricalDataPromises() {
+    return this.historicalDataPromises;
+  }
+
+  getHistoricalDataBIRPromise() {
+    return this.historicalDataBIRPromise;
+  }
+
+  getGlobalPromise() {
+    return this.globalPromise;
+  }
+
+  getCryptoCompareNewsPromise() {
+    return this.cryptoCompareNewsPromise;
+  }
+
+  getSubRedditNewsPromise() {
+    return this.subRedditNewsPromise;
   }
 }

@@ -6,10 +6,10 @@
 				<th width="23.75%">Currency</th>
 				<th width="23.75%">24 Hour Change</th>
 				<th width="23.75%">Value USD</th>
-				<th width="23.75%">Market Cap %</th>
+				<th width="23.75%">Market Cap</th>
 			</tr>
 		</thead>
-		<tbody *ngFor="let c of currencies; let i = index " (click)="expandedRow[i] = !expandedRow[i]">
+		<tbody *ngFor="let c of currencies; let i = index " (click)="expandedRow[i] = !expandedRow[i];">
 			<tr>
 				<td>
 					{{ i + 1 }}
@@ -23,18 +23,28 @@
 					{{ c['percent_change_24h'] | number:'1.2-2' }}%
 				</td>
 				<td>${{ c['price_usd'] | number:'1.2-2' }}</td>
-				<td> {{ marketCapPercentage[i] | percent:'.1-1' }}</td>
+				<td>${{ c['market_cap_usd'] | formatLargeNums}}</td>
 			</tr>
 			<tr *ngIf="expandedRow[i]">
 				<td></td>
-				<td>Market Cap: ${{ c['market_cap_usd'] | formatLargeNums}}</td>
-				<td>24h Volume: ${{ c['24h_volume_usd'] | formatLargeNums}}</td>
-				<td>Supply: {{ c['available_supply']  | formatLargeNums}}</td>
-				<td>
-					24h Ch. Rel. Bitcoin: 
-					<span [ngClass]="bitcoinRelativeColors[i] ? 'positive-class' : 'negative-class'">
-						{{ bitcoinRelativeChange[i] | number:'1.2-2'}}%
-					</span> 
+				<td colspan="2">
+					<div>
+						<p>24h Volume: ${{ c['24h_volume_usd'] | formatLargeNums }}</p>
+						<p>Supply: {{ c['available_supply']  | formatLargeNums }}</p>
+						<p>Market Cap Per: {{ marketCapPercentage[i] | percent:'.1-1' }}</p>
+						<p>
+							24h Ch. Rel. Bitcoin: 
+							<span [ngClass]="bitcoinRelativeColors[i] ? 'positive-class' : 'negative-class'">
+								{{ bitcoinRelativeChanges[i] | number:'1.2-2'}}%
+							</span>
+						</p>
+					</div>
+				</td>
+				<td colspan="2">
+					<p *ngIf="loading[i]; else showChart">Loading...</p>
+ 		 			<ng-template #showChart>
+ 		 				<app-charts [ctx]='i' [data]='historicalData[i]'></app-charts>
+					</ng-template>
 				</td>
 			</tr>
 		</tbody>

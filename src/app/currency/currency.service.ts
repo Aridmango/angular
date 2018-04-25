@@ -1,8 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import 'rxjs/Rx';
-import 'rxjs/add/operator/toPromise';
 
 import { Observable } from 'rxjs/Observable';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
@@ -14,18 +11,19 @@ import { HistoricalData } from './historicalData.model';
 
 @Injectable()
 export class CurrencyService {
-	public currency: Currency[] = [];
-  public historicalData: HistoricalData[] = [];
   public global: Global;
-  public marketCapPercentage: number[] = [];
-	percentageColors: boolean[] = [];
-  bitcoinRelativeColors: boolean[] = [];
-  public dates;
-  bitcoinRelativeChange: number[] = [];
-	cmcURL = 'https://api.coinmarketcap.com/v1/ticker/?start=';
-  cmcgURL= 'https://api.coinmarketcap.com/v1/global/';
+  public currencyBIR: Currency;
+  public historicalDataBIR: HistoricalData;
 
-  constructor(private httpClient: HttpClient) { }
+  public historicalData;
+  public dates: any[] = [];
+  public currency: Currency[] = [];
+  public percentageColors: boolean[] = [];
+  public marketCapPercentage: number[] = [];
+  public bitcoinRelativeChange: number[] = [];
+  public bitcoinRelativeColors: boolean[] = [];
+
+  constructor() { }
 
   setCurrencies(data: Currency[]) {
 	  for (var i = 0; i < data.length; i++){
@@ -34,16 +32,9 @@ export class CurrencyService {
   	}
   }
 
-  getCurrency(currencyName: string) {
-  	for (var i = 0; i < this.currency.length; i++){
-  		if (currencyName === this.currency[i].id)
-  			return this.currency[i];
-  	}
-  	return null;
-  }
-
-  getCurrencies() {
-  	return this.currency;
+  setCurrencyBIR(currency: Currency) {
+    this.currencyBIR = currency;
+    this.currencyBIR.last_updated = ((+this.currencyBIR.last_updated)*1000);
   }
 
   setPercentageColors(start: number) {
@@ -55,34 +46,70 @@ export class CurrencyService {
   	}
   }
 
-  getPercentageColors() {
-  	return this.percentageColors;
-  }
-
-  calculateMarketCapPercentage(start: number) {
+  setMarketCapPercentage(start: number) {
     for (var i = start; i < this.currency.length; i++) {
       this.marketCapPercentage.push((+this.currency[i]['market_cap_usd'])/(+this.global['total_market_cap_usd']))
     }
   }
 
-  getMarketCapPercentage() {
-    return this.marketCapPercentage;
-  }
-
-  getDate(currencyName: string) {
-    for (var i = 0; i < this.currency.length; i++){
-      if (currencyName === this.currency[i].id)
-        return this.dates[i];
-    }
-    return null;
-  }
-
-  percentChangeRelativeToBitcoin(start: number) {
+  setPercentChangeRelativeToBitcoin(start: number) {
     for (var i = start; i < this.currency.length; i++) {
       this.bitcoinRelativeChange.push(
         +this.currency[i].percent_change_24h - +this.currency[0].percent_change_24h)
     }
-    console.log(this.bitcoinRelativeChange);
+  }
+
+  setRelativeChangeColors(start: number) {
+    for (var i = start; i < this.currency.length; i++) {
+      if (+this.bitcoinRelativeChange[i] >= 0)
+        this.bitcoinRelativeColors.push(true);
+      else
+        this.bitcoinRelativeColors.push(false);
+    }
+  }
+
+  initializeHistoricalDataArray() {
+    this.historicalData = Array(25).fill(null);
+  }
+
+  increaseHistoricalDataArraySize() {
+    this.historicalData.length += 25;
+  }
+
+  setHistoricalData(data: HistoricalData[], index: number) {
+    this.historicalData[index] = data;
+  }
+
+  setHistoricalDataBIR(data: HistoricalData) {
+    this.historicalDataBIR = data;
+  }
+
+  setGlobal(g: any) {
+    this.global = g;
+  }
+
+  getCurrencies() {
+    return this.currency;
+  }
+
+  getCurrency(currencyName: string) {
+    for (var i = 0; i < this.currency.length; i++){
+      if (currencyName === this.currency[i].id)
+        return this.currency[i];
+    }
+    return null;
+  }
+
+  getCurrencyBIR(){
+    return this.currencyBIR;
+  }
+
+  getPercentageColors() {
+    return this.percentageColors;
+  }
+
+  getMarketCapPercentage() {
+    return this.marketCapPercentage;
   }
 
   getBitcoinRelativeChange(currencyName: string) {
@@ -97,20 +124,27 @@ export class CurrencyService {
     return this.bitcoinRelativeChange;
   } 
 
-  setRelativeChangeColors(start: number) {
-    for (var i = start; i < this.currency.length; i++) {
-      if (+this.bitcoinRelativeChange[i] >= 0)
-        this.bitcoinRelativeColors.push(true);
-      else
-        this.bitcoinRelativeColors.push(false);
-    }
-  }
-
   getBitcoinRelativeColors() {
     return this.bitcoinRelativeColors;
   }
 
-  setGlobal(g: any) {
-    this.global = g;
+  getHistoricalData() {
+    return this.historicalData;
+  }
+
+  getHistoricalDataBIR() {
+    return this.historicalDataBIR;
+  }
+
+  getGlobal() {
+    return this.global;
+  }
+
+  getDate(currencyName: string) {
+    for (var i = 0; i < this.currency.length; i++){
+      if (currencyName === this.currency[i].id)
+        return this.dates[i];
+    }
+    return null;
   }
 }

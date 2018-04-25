@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import 'rxjs/Rx';
 import 'rxjs/add/operator/toPromise';
 
@@ -12,38 +10,47 @@ import { CryptoCompare } from './cryptocompare.model';
 
 @Injectable()
 export class SocialService {
-  public ccNews: CryptoCompare[] = [];
-	ccURL = 'https://min-api.cryptocompare.com/data/news/?lang=EN';
+  public subRedditNews: any[] = [];
   public slicedUrls: string[] = [];
+  public cryptoCompareNews: CryptoCompare[] = [];
 
-  constructor(private httpClient: HttpClient) { }
-
-  setCCNews(news: CryptoCompare[]) {
+  setCryptoCompareNews(news: CryptoCompare[]) {
     for (var i = 0; i < news.length; i++){
-      this.ccNews.push(news[i]);
+      this.cryptoCompareNews.push(news[i]);
+    }
+    this.setSlicedUrls();
+  }
+
+  setSubRedditNews(news: any[]) {
+    for (var i = 0; i < news.length; i++){
+      this.subRedditNews.push(news[i]);
     }
   }
 
-  getCCNews() {
-    return this.ccNews;
-  }
-
-  sliceUrls() {
-    for (var i = 0; i < this.ccNews.length; i++) {
+  setSlicedUrls() {
+    for (var i = 0; i < this.cryptoCompareNews.length; i++) {
       //remove .com
-      let n = this.ccNews[i]['guid'].indexOf('.com');
-      let s = this.ccNews[i]['guid'].substring(0, n != -1 ? n+4 : this.ccNews[i]['guid'].length);
+      let n = this.cryptoCompareNews[i]['guid'].indexOf('.com');
+      let s = this.cryptoCompareNews[i]['guid'].substring(0, n != -1 ? n+4 : this.cryptoCompareNews[i]['guid'].length);
       //remove https://
-      n = this.ccNews[i]['guid'].indexOf('https://');
-      s = s.substring(n != -1 ? n+8 : 0, this.ccNews[i]['guid'].length);
+      n = this.cryptoCompareNews[i]['guid'].indexOf('https://');
+      s = s.substring(n != -1 ? n+8 : 0, this.cryptoCompareNews[i]['guid'].length);
       //remove http://
-      n = this.ccNews[i]['guid'].indexOf('http://');
-      s = s.substring(n != -1 ? n+7 : 0, this.ccNews[i]['guid'].length);
+      n = this.cryptoCompareNews[i]['guid'].indexOf('http://');
+      s = s.substring(n != -1 ? n+7 : 0, this.cryptoCompareNews[i]['guid'].length);
       //remove www.
       n = s.indexOf('www.');
-      s = s.substring(n != -1 ? n+4 : 0, this.ccNews[i]['guid'].length);
+      s = s.substring(n != -1 ? n+4 : 0, this.cryptoCompareNews[i]['guid'].length);
       this.slicedUrls.push(s);
     }
+  }
+
+  getSubRedditNews() {
+    return this.subRedditNews;
+  }
+
+  getCryptoCompareNews() {
+    return this.cryptoCompareNews;
   }
 
   getSlicedUrls() {

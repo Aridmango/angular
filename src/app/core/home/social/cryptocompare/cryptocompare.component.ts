@@ -15,7 +15,7 @@ export class CryptocompareComponent implements OnInit {
   public slicedUrls: string[] = [];
 
   constructor(private socialService: SocialService) {
-  	this.ccNews = this.socialService.getCCNews();
+  	this.ccNews = this.socialService.getCryptoCompareNews();
   	this.slicedUrls = this.socialService.getSlicedUrls();
   }
 
